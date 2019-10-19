@@ -9,8 +9,9 @@ from pygame.locals import *
 FPS = 30
 SCREENWIDTH  = 288
 SCREENHEIGHT = 512
-PIPEGAPSIZE  = 125 # gap between upper and lower part of pipe
-BASEY        = SCREENHEIGHT * 0.79
+PIPEGAPSIZE  = 170 # gap between upper and lower part of pipe
+BASEY        = SCREENHEIGHT * 0.90
+BASEY2       = SCREENHEIGHT * -0.10
 # image, sound and hitmask  dicts
 IMAGES, SOUNDS, HITMASKS = {}, {}, {}
 
@@ -40,13 +41,16 @@ PLAYERS_LIST = (
 # list of backgrounds
 BACKGROUNDS_LIST = (
     'assets/sprites/nightsky.png',
-    'assets/sprites/nightsky.png'
+    'assets/sprites/space2.png'
 )
 
 # list of pipes
 PIPES_LIST = (
     'assets/sprites/mars.png',
-    'assets/sprites/mars.png',
+    'assets/sprites/Saturn.png',
+    'assets/sprites/earth.png',
+    'assets/sprites/purpleplanet.png',
+    'assets/sprites/venus.png',
 )
 
 
@@ -61,7 +65,7 @@ def main():
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
     SCREEN = pygame.display.set_mode((SCREENWIDTH, SCREENHEIGHT))
-    pygame.display.set_caption('Flappy Bird')
+    pygame.display.set_caption('HighwayToSpace')
 
     # numbers sprites for score display
     IMAGES['numbers'] = (
@@ -83,6 +87,8 @@ def main():
     IMAGES['message'] = pygame.image.load('assets/sprites/message.png').convert_alpha()
     # base (ground) sprite
     IMAGES['base'] = pygame.image.load('assets/sprites/base.png').convert_alpha()
+    IMAGES['baseup'] = pygame.image.load('assets/sprites/baseup.png').convert_alpha()
+
 
     # sounds
     if 'win' in sys.platform:
@@ -150,8 +156,10 @@ def showWelcomeAnimation():
     messagey = int(SCREENHEIGHT * 0.12)
 
     basex = 0
+    basex2 = 0
     # amount by which base can maximum shift to left
     baseShift = IMAGES['base'].get_width() - IMAGES['background'].get_width()
+    baseShift2 = IMAGES['baseup'].get_width() - IMAGES['background'].get_width()
 
     # player shm for up-down motion on welcome screen
     playerShmVals = {'val': 0, 'dir': 1}
@@ -167,6 +175,7 @@ def showWelcomeAnimation():
                 return {
                     'playery': playery + playerShmVals['val'],
                     'basex': basex,
+                    'basex2':basex2,
                     'playerIndexGen': playerIndexGen,
                 }
 
@@ -175,6 +184,7 @@ def showWelcomeAnimation():
             playerIndex = next(playerIndexGen)
         loopIter = (loopIter + 1) % 30
         basex = -((-basex + 4) % baseShift)
+        basex2 = -((-basex2 + 4) % baseShift2)
         playerShm(playerShmVals)
 
         # draw sprites
@@ -183,6 +193,8 @@ def showWelcomeAnimation():
                     (playerx, playery + playerShmVals['val']))
         SCREEN.blit(IMAGES['message'], (messagex, messagey))
         SCREEN.blit(IMAGES['base'], (basex, BASEY))
+        SCREEN.blit(IMAGES['baseup'], (basex2, BASEY2))
+
 
         pygame.display.update()
         FPSCLOCK.tick(FPS)
@@ -195,6 +207,8 @@ def mainGame(movementInfo):
 
     basex = movementInfo['basex']
     baseShift = IMAGES['base'].get_width() - IMAGES['background'].get_width()
+    basex2 = movementInfo['basex2']
+    baseShift2 = IMAGES['baseup'].get_width() - IMAGES['background'].get_width()
 
     # get 2 new pipes to add to upperPipes lowerPipes list
     newPipe1 = getRandomPipe()
@@ -219,7 +233,7 @@ def mainGame(movementInfo):
     playerMaxVelY =  10   # max vel along Y, max descend speed
     playerMinVelY =  -8   # min vel along Y, max ascend speed
     playerAccY    =   1   # players downward accleration
-    playerRot     =  45   # player's rotation
+    playerRot     =  40   # player's rotation
     playerVelRot  =   3   # angular speed
     playerRotThr  =  20   # rotation threshold
     playerFlapAcc =  -9   # players speed on flapping
@@ -245,6 +259,7 @@ def mainGame(movementInfo):
                 'y': playery,
                 'groundCrash': crashTest[1],
                 'basex': basex,
+                'basex2': basex2,
                 'upperPipes': upperPipes,
                 'lowerPipes': lowerPipes,
                 'score': score,
@@ -265,6 +280,7 @@ def mainGame(movementInfo):
             playerIndex = next(playerIndexGen)
         loopIter = (loopIter + 1) % 30
         basex = -((-basex + 100) % baseShift)
+        basex2 = -((-basex2 + 100) % baseShift2)
 
         # rotate the player
         if playerRot > -90:
@@ -306,6 +322,7 @@ def mainGame(movementInfo):
             SCREEN.blit(IMAGES['pipe'][1], (lPipe['x'], lPipe['y']))
 
         SCREEN.blit(IMAGES['base'], (basex, BASEY))
+        SCREEN.blit(IMAGES['baseup'], (basex2, BASEY2))
         # print score so player overlaps the score
         showScore(score)
 
@@ -333,6 +350,7 @@ def showGameOverScreen(crashInfo):
     playerVelRot = 7
 
     basex = crashInfo['basex']
+    basex2 = crashInfo['basex2']
 
     upperPipes, lowerPipes = crashInfo['upperPipes'], crashInfo['lowerPipes']
 
@@ -371,6 +389,7 @@ def showGameOverScreen(crashInfo):
             SCREEN.blit(IMAGES['pipe'][1], (lPipe['x'], lPipe['y']))
 
         SCREEN.blit(IMAGES['base'], (basex, BASEY))
+        SCREEN.blit(IMAGES['baseup'], (basex2, BASEY2))
         showScore(score)
 
         
@@ -398,7 +417,7 @@ def playerShm(playerShm):
 def getRandomPipe():
     """returns a randomly generated pipe"""
     # y of gap between upper and lower pipe
-    gapY = random.randrange(0, int(BASEY * 0.6 - PIPEGAPSIZE))
+    gapY = random.randrange(0, int(BASEY * 0.9 - PIPEGAPSIZE))
     gapY += int(BASEY * 0.2)
     pipeHeight = IMAGES['pipe'][0].get_height()
     pipeX = SCREENWIDTH + 10
