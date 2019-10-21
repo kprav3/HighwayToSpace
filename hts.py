@@ -9,7 +9,7 @@ from pygame.locals import *
 FPS = 30
 SCREENWIDTH  = 288
 SCREENHEIGHT = 512
-PIPEGAPSIZE  = 170 # gap between upper and lower part of pipe
+PIPEGAPSIZE  = 125 # gap between upper and lower part of pipe
 BASEY        = SCREENHEIGHT * 0.90
 BASEY2       = SCREENHEIGHT * -0.10
 # image, sound and hitmask  dicts
@@ -41,23 +41,21 @@ PLAYERS_LIST = (
 # list of backgrounds
 BACKGROUNDS_LIST = (
     'assets/sprites/nightsky.png',
-    'assets/sprites/space2.png'
+
 )
 
 # list of pipes
 PIPES_LIST = (
-    'assets/sprites/mars.png',
-    'assets/sprites/Saturn.png',
-    'assets/sprites/earth.png',
-    'assets/sprites/purpleplanet.png',
-    'assets/sprites/venus.png',
+    'assets/sprites/asteroid1.png',
+    'assets/sprites/asteroid2.png',
+    'assets/sprites/asteroid3.png',
 )
 
 
 try:
     xrange
 except NameError:
-    xrange = range
+    range = range
 
 
 def main():
@@ -87,6 +85,7 @@ def main():
     IMAGES['message'] = pygame.image.load('assets/sprites/message.png').convert_alpha()
     # base (ground) sprite
     IMAGES['base'] = pygame.image.load('assets/sprites/base.png').convert_alpha()
+    # head sprite
     IMAGES['baseup'] = pygame.image.load('assets/sprites/baseup.png').convert_alpha()
 
 
@@ -117,16 +116,31 @@ def main():
 
         # select random pipe sprites
         pipeindex = random.randint(0, len(PIPES_LIST) - 1)
-        IMAGES['pipe'] = (
-            pygame.transform.flip(
-                pygame.image.load(PIPES_LIST[pipeindex]).convert_alpha(), False, True),
+        pipeindex2 = random.randint(0, len(PIPES_LIST) - 1)
+        pipeindex3 = random.randint(0, len(PIPES_LIST) - 1)
+        pipeindex4 = random.randint(0, len(PIPES_LIST) - 1)
+        pipeindex5 = random.randint(0, len(PIPES_LIST) - 1)
+
+        pipes = [
+            pygame.image.load(PIPES_LIST[pipeindex2]).convert_alpha(),
             pygame.image.load(PIPES_LIST[pipeindex]).convert_alpha(),
+            pygame.image.load(PIPES_LIST[pipeindex3]).convert_alpha(),
+            pygame.image.load(PIPES_LIST[pipeindex4]).convert_alpha(),
+            pygame.image.load(PIPES_LIST[pipeindex5]).convert_alpha()
+            ]
+        IMAGES['pipe'] = (
+            pipes[random.randint(0, len(pipes) - 1)],
+            pipes[random.randint(0, len(pipes) - 1)],
+            pipes[random.randint(0, len(pipes) - 1)],
+            pipes[random.randint(0, len(pipes) - 1)],
+            pipes[random.randint(0, len(pipes) - 1)],
         )
 
         # hismask for pipes
         HITMASKS['pipe'] = (
             getHitmask(IMAGES['pipe'][0]),
             getHitmask(IMAGES['pipe'][1]),
+            getHitmask(IMAGES['pipe'][2]),
         )
 
         # hitmask for player
@@ -213,6 +227,9 @@ def mainGame(movementInfo):
     # get 2 new pipes to add to upperPipes lowerPipes list
     newPipe1 = getRandomPipe()
     newPipe2 = getRandomPipe()
+    newPipe3 = getRandomPipe()
+    newPipe4 = getRandomPipe()
+    newPipe5 = getRandomPipe()
 
     # list of upper pipes
     upperPipes = [
@@ -224,6 +241,12 @@ def mainGame(movementInfo):
     lowerPipes = [
         {'x': SCREENWIDTH + 200, 'y': newPipe1[1]['y']},
         {'x': SCREENWIDTH + 200 + (SCREENWIDTH / 2), 'y': newPipe2[1]['y']},
+    ]
+
+    #list of middle pipe
+    middlePipes = [
+            {'x':SCREENWIDTH + 200, 'y': newPipe3[1]['y']},
+            {'x':SCREENWIDTH + 200 +  (SCREENWIDTH / 2), 'y':newPipe3[1]['y']},
     ]
 
     pipeVelX = -4
@@ -253,7 +276,7 @@ def mainGame(movementInfo):
 
         # check for crash here
         crashTest = checkCrash({'x': playerx, 'y': playery, 'index': playerIndex},
-                               upperPipes, lowerPipes)
+                               upperPipes, middlePipes, lowerPipes)
         if crashTest[0]:
             return {
                 'y': playery,
@@ -262,6 +285,7 @@ def mainGame(movementInfo):
                 'basex2': basex2,
                 'upperPipes': upperPipes,
                 'lowerPipes': lowerPipes,
+                'middlePipes': middlePipes,
                 'score': score,
                 'playerVelY': playerVelY,
                 'playerRot': playerRot
@@ -299,27 +323,32 @@ def mainGame(movementInfo):
         playery += min(playerVelY, BASEY - playery - playerHeight)
 
         # move pipes to left
-        for uPipe, lPipe in zip(upperPipes, lowerPipes):
+        for uPipe, lPipe, mPipe in zip(upperPipes, lowerPipes, middlePipes):
             uPipe['x'] += pipeVelX
             lPipe['x'] += pipeVelX
+            mPipe['x'] += pipeVelX
+
 
         # add new pipe when first pipe is about to touch left of screen
         if 0 < upperPipes[0]['x'] < 5:
             newPipe = getRandomPipe()
             upperPipes.append(newPipe[0])
             lowerPipes.append(newPipe[1])
+            middlePipes.append(newPipe[2])
 
         # remove first pipe if its out of the screen
         if upperPipes[0]['x'] < -IMAGES['pipe'][0].get_width():
             upperPipes.pop(0)
             lowerPipes.pop(0)
+            middlePipes.pop(0)
 
         # draw sprites
         SCREEN.blit(IMAGES['background'], (0,0))
 
-        for uPipe, lPipe in zip(upperPipes, lowerPipes):
+        for uPipe, lPipe, mPipe in zip(upperPipes, lowerPipes, middlePipes):
             SCREEN.blit(IMAGES['pipe'][0], (uPipe['x'], uPipe['y']))
             SCREEN.blit(IMAGES['pipe'][1], (lPipe['x'], lPipe['y']))
+            SCREEN.blit(IMAGES['pipe'][2], (mPipe['x'], mPipe['y']))
 
         SCREEN.blit(IMAGES['base'], (basex, BASEY))
         SCREEN.blit(IMAGES['baseup'], (basex2, BASEY2))
@@ -352,7 +381,7 @@ def showGameOverScreen(crashInfo):
     basex = crashInfo['basex']
     basex2 = crashInfo['basex2']
 
-    upperPipes, lowerPipes = crashInfo['upperPipes'], crashInfo['lowerPipes']
+    upperPipes, lowerPipes, middlePipes = crashInfo['upperPipes'], crashInfo['lowerPipes'], crashInfo['middlePipes']
 
     # play hit and die sounds
     SOUNDS['hit'].play()
@@ -384,9 +413,10 @@ def showGameOverScreen(crashInfo):
         # draw sprites
         SCREEN.blit(IMAGES['background'], (0,0))
 
-        for uPipe, lPipe in zip(upperPipes, lowerPipes):
+        for uPipe, lPipe, mPipe in zip(upperPipes, lowerPipes, middlePipes):
             SCREEN.blit(IMAGES['pipe'][0], (uPipe['x'], uPipe['y']))
             SCREEN.blit(IMAGES['pipe'][1], (lPipe['x'], lPipe['y']))
+            SCREEN.blit(IMAGES['pipe'][2], (mPipe['x'], mPipe['y']))
 
         SCREEN.blit(IMAGES['base'], (basex, BASEY))
         SCREEN.blit(IMAGES['baseup'], (basex2, BASEY2))
@@ -425,6 +455,7 @@ def getRandomPipe():
     return [
         {'x': pipeX, 'y': gapY - pipeHeight},  # upper pipe
         {'x': pipeX, 'y': gapY + PIPEGAPSIZE}, # lower pipe
+        {'x': pipeX , 'y':gapY + PIPEGAPSIZE}, # middle pipe
     ]
 
 
@@ -443,7 +474,7 @@ def showScore(score):
         Xoffset += IMAGES['numbers'][digit].get_width()
 
 
-def checkCrash(player, upperPipes, lowerPipes):
+def checkCrash(player, upperPipes, lowerPipes, middlePipes):
     """returns True if player collders with base or pipes."""
     pi = player['index']
     player['w'] = IMAGES['player'][0].get_width()
@@ -452,6 +483,9 @@ def checkCrash(player, upperPipes, lowerPipes):
     # if player crashes into ground
     if player['y'] + player['h'] >= BASEY - 1:
         return [True, True]
+    if player['y'] + player['h'] <= BASEY2 + 1:
+        return [True, True]
+    
     else:
 
         playerRect = pygame.Rect(player['x'], player['y'],
@@ -459,21 +493,24 @@ def checkCrash(player, upperPipes, lowerPipes):
         pipeW = IMAGES['pipe'][0].get_width()
         pipeH = IMAGES['pipe'][0].get_height()
 
-        for uPipe, lPipe in zip(upperPipes, lowerPipes):
+        for uPipe, lPipe, mPipe in zip(upperPipes, lowerPipes, middlePipes):
             # upper and lower pipe rects
             uPipeRect = pygame.Rect(uPipe['x'], uPipe['y'], pipeW, pipeH)
             lPipeRect = pygame.Rect(lPipe['x'], lPipe['y'], pipeW, pipeH)
+            mPipeRect = pygame.Rect(mPipe['x'], mPipe['y'], pipeW, pipeH)
 
             # player and upper/lower pipe hitmasks
             pHitMask = HITMASKS['player'][pi]
             uHitmask = HITMASKS['pipe'][0]
             lHitmask = HITMASKS['pipe'][1]
+            mHitmask = HITMASKS['pipe'][2]
 
             # if bird collided with upipe or lpipe
             uCollide = pixelCollision(playerRect, uPipeRect, pHitMask, uHitmask)
             lCollide = pixelCollision(playerRect, lPipeRect, pHitMask, lHitmask)
+            mCollide = pixelCollision(playerRect, mPipeRect, pHitMask, mHitmask)
 
-            if uCollide or lCollide:
+            if uCollide or lCollide or mCollide:
                 return [True, False]
 
     return [False, False]
@@ -488,8 +525,8 @@ def pixelCollision(rect1, rect2, hitmask1, hitmask2):
     x1, y1 = rect.x - rect1.x, rect.y - rect1.y
     x2, y2 = rect.x - rect2.x, rect.y - rect2.y
 
-    for x in xrange(rect.width):
-        for y in xrange(rect.height):
+    for x in range(rect.width):
+        for y in range(rect.height):
             if hitmask1[x1+x][y1+y] and hitmask2[x2+x][y2+y]:
                 return True
     return False
@@ -497,9 +534,9 @@ def pixelCollision(rect1, rect2, hitmask1, hitmask2):
 def getHitmask(image):
     """returns a hitmask using an image's alpha."""
     mask = []
-    for x in xrange(image.get_width()):
+    for x in range(image.get_width()):
         mask.append([])
-        for y in xrange(image.get_height()):
+        for y in range(image.get_height()):
             mask[x].append(bool(image.get_at((x,y))[3]))
     return mask
 
