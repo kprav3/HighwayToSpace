@@ -9,47 +9,40 @@ from pygame.locals import *
 FPS = 30
 SCREENWIDTH  = 288
 SCREENHEIGHT = 512
-PIPEGAPSIZE  = 125 # gap between upper and lower part of pipe
+PLANETGAPSIZE  = 125 # gap between upper and lower part of planet
 BASEY        = SCREENHEIGHT * 0.90
-BASEY2       = SCREENHEIGHT * -0.10
+HEAD       = SCREENHEIGHT * -0.10
 # image, sound and hitmask  dicts
 IMAGES, SOUNDS, HITMASKS = {}, {}, {}
 
-# list of all possible players (tuple of 3 positions of flap)
+# list of all possible players
 PLAYERS_LIST = (
-    # red bird
+    # ufo
     ( 
         'assets/sprites/ufo.png',
-        'assets/sprites/ufo.png',
-        'assets/sprites/ufo.png',
+        'assets/sprites/ufo1.png',
+        'assets/sprites/ufo2.png',
     ),
-    # blue bird
+    # medium ufo
     (
         'assets/sprites/ufo.png',
-        'assets/sprites/ufo.png',
-        'assets/sprites/ufo.png',
-    ),
-    # yellow bird
-    (
-        'assets/sprites/ufo.png',
-        'assets/sprites/ufo.png',
-        'assets/sprites/ufo.png',
+        'assets/sprites/ufo1.png',
+        'assets/sprites/ufo2.png',
     ),
 
 )
 
-# list of backgrounds
+# list of Backgrounds
 BACKGROUNDS_LIST = (
     'assets/sprites/nightsky.png',
 
 )
 
-# list of pipes
-PIPES_LIST = (
+# list of Planets
+PLANETS_LIST = (
     'assets/sprites/asteroid1.png',
     'assets/sprites/asteroid2.png',
-    'assets/sprites/asteroid3.png',
-)
+    )
 
 
 try:
@@ -79,15 +72,14 @@ def main():
         pygame.image.load('assets/sprites/9.png').convert_alpha()
     )
 
-    # game over sprite
+    # Game Over image
     IMAGES['gameover'] = pygame.image.load('assets/sprites/gameover.png').convert_alpha()
-    # message sprite for welcome screen
+    # Display image for Welcome Screen
     IMAGES['message'] = pygame.image.load('assets/sprites/message.png').convert_alpha()
-    # base (ground) sprite
+    # baseh sprite
     IMAGES['base'] = pygame.image.load('assets/sprites/base.png').convert_alpha()
     # head sprite
-    IMAGES['baseup'] = pygame.image.load('assets/sprites/baseup.png').convert_alpha()
-
+    IMAGES['head'] = pygame.image.load('assets/sprites/head.png').convert_alpha()
 
     # sounds
     if 'win' in sys.platform:
@@ -114,33 +106,33 @@ def main():
             pygame.image.load(PLAYERS_LIST[randPlayer][2]).convert_alpha(),
         )
 
-        # select random pipe sprites
-        pipeindex = random.randint(0, len(PIPES_LIST) - 1)
-        pipeindex2 = random.randint(0, len(PIPES_LIST) - 1)
-        pipeindex3 = random.randint(0, len(PIPES_LIST) - 1)
-        pipeindex4 = random.randint(0, len(PIPES_LIST) - 1)
-        pipeindex5 = random.randint(0, len(PIPES_LIST) - 1)
+        # select random planet sprites
+        planetindex = random.randint(0, len(PLANETS_LIST) - 1)
+        planetindex2 = random.randint(0, len(PLANETS_LIST) - 1)
+        planetindex3 = random.randint(0, len(PLANETS_LIST) - 1)
+        planetindex4 = random.randint(0, len(PLANETS_LIST) - 1)
+        planetindex5 = random.randint(0, len(PLANETS_LIST) - 1)
 
-        pipes = [
-            pygame.image.load(PIPES_LIST[pipeindex2]).convert_alpha(),
-            pygame.image.load(PIPES_LIST[pipeindex]).convert_alpha(),
-            pygame.image.load(PIPES_LIST[pipeindex3]).convert_alpha(),
-            pygame.image.load(PIPES_LIST[pipeindex4]).convert_alpha(),
-            pygame.image.load(PIPES_LIST[pipeindex5]).convert_alpha()
+        Planets = [
+            pygame.image.load(PLANETS_LIST[planetindex2]).convert_alpha(),
+            pygame.image.load(PLANETS_LIST[planetindex]).convert_alpha(),
+            pygame.image.load(PLANETS_LIST[planetindex3]).convert_alpha(),
+            pygame.image.load(PLANETS_LIST[planetindex4]).convert_alpha(),
+            pygame.image.load(PLANETS_LIST[planetindex5]).convert_alpha()
             ]
-        IMAGES['pipe'] = (
-            pipes[random.randint(0, len(pipes) - 1)],
-            pipes[random.randint(0, len(pipes) - 1)],
-            pipes[random.randint(0, len(pipes) - 1)],
-            pipes[random.randint(0, len(pipes) - 1)],
-            pipes[random.randint(0, len(pipes) - 1)],
+        IMAGES['planet'] = (
+            Planets[random.randint(0, len(Planets) - 1)],
+            Planets[random.randint(0, len(Planets) - 1)],
+            Planets[random.randint(0, len(Planets) - 1)],
+            Planets[random.randint(0, len(Planets) - 1)],
+            Planets[random.randint(0, len(Planets) - 1)],
         )
 
-        # hismask for pipes
-        HITMASKS['pipe'] = (
-            getHitmask(IMAGES['pipe'][0]),
-            getHitmask(IMAGES['pipe'][1]),
-            getHitmask(IMAGES['pipe'][2]),
+        # hismask for Planets
+        HITMASKS['planet'] = (
+            getHitmask(IMAGES['planet'][0]),
+            getHitmask(IMAGES['planet'][1]),
+            getHitmask(IMAGES['planet'][2]),
         )
 
         # hitmask for player
@@ -156,7 +148,7 @@ def main():
 
 
 def showWelcomeAnimation():
-    """Shows welcome screen animation of flappy bird"""
+    """Shows welcome screen animation of Boostpy bird"""
     # index of player to blit on screen
     playerIndex = 0
     playerIndexGen = cycle([0, 1, 2, 1])
@@ -173,7 +165,7 @@ def showWelcomeAnimation():
     basex2 = 0
     # amount by which base can maximum shift to left
     baseShift = IMAGES['base'].get_width() - IMAGES['background'].get_width()
-    baseShift2 = IMAGES['baseup'].get_width() - IMAGES['background'].get_width()
+    baseShift2 = IMAGES['head'].get_width() - IMAGES['background'].get_width()
 
     # player shm for up-down motion on welcome screen
     playerShmVals = {'val': 0, 'dir': 1}
@@ -184,7 +176,7 @@ def showWelcomeAnimation():
                 pygame.quit()
                 sys.exit()
             if event.type == KEYDOWN and (event.key == K_SPACE or event.key == K_UP):
-                # make first flap sound and return values for mainGame
+                # make first Boost sound and return values for mainGame
                 SOUNDS['wing'].play()
                 return {
                     'playery': playery + playerShmVals['val'],
@@ -207,7 +199,7 @@ def showWelcomeAnimation():
                     (playerx, playery + playerShmVals['val']))
         SCREEN.blit(IMAGES['message'], (messagex, messagey))
         SCREEN.blit(IMAGES['base'], (basex, BASEY))
-        SCREEN.blit(IMAGES['baseup'], (basex2, BASEY2))
+        SCREEN.blit(IMAGES['head'], (basex2, HEAD))
 
 
         pygame.display.update()
@@ -222,45 +214,45 @@ def mainGame(movementInfo):
     basex = movementInfo['basex']
     baseShift = IMAGES['base'].get_width() - IMAGES['background'].get_width()
     basex2 = movementInfo['basex2']
-    baseShift2 = IMAGES['baseup'].get_width() - IMAGES['background'].get_width()
+    baseShift2 = IMAGES['head'].get_width() - IMAGES['background'].get_width()
 
-    # get 2 new pipes to add to upperPipes lowerPipes list
-    newPipe1 = getRandomPipe()
-    newPipe2 = getRandomPipe()
-    newPipe3 = getRandomPipe()
-    newPipe4 = getRandomPipe()
-    newPipe5 = getRandomPipe()
+    # get 2 new Planets to add to upperPlanets lowerPlanets list
+    newplanet1 = getRandomplanet()
+    newplanet2 = getRandomplanet()
+    newplanet3 = getRandomplanet()
+    newplanet4 = getRandomplanet()
+    newplanet5 = getRandomplanet()
 
-    # list of upper pipes
-    upperPipes = [
-        {'x': SCREENWIDTH + 200, 'y': newPipe1[0]['y']},
-        {'x': SCREENWIDTH + 200 + (SCREENWIDTH / 2), 'y': newPipe2[0]['y']},
+    # list of upper Planets
+    upperPlanets = [
+        {'x': SCREENWIDTH + 200, 'y': newplanet1[0]['y']},
+        {'x': SCREENWIDTH + 200 + (SCREENWIDTH / 2), 'y': newplanet2[0]['y']},
     ]
 
-    # list of lowerpipe
-    lowerPipes = [
-        {'x': SCREENWIDTH + 200, 'y': newPipe1[1]['y']},
-        {'x': SCREENWIDTH + 200 + (SCREENWIDTH / 2), 'y': newPipe2[1]['y']},
+    # list of lowerplanet
+    lowerPlanets = [
+        {'x': SCREENWIDTH + 200, 'y': newplanet1[1]['y']},
+        {'x': SCREENWIDTH + 200 + (SCREENWIDTH / 2), 'y': newplanet2[1]['y']},
     ]
 
-    #list of middle pipe
-    middlePipes = [
-            {'x':SCREENWIDTH + 200, 'y': newPipe3[1]['y']},
-            {'x':SCREENWIDTH + 200 +  (SCREENWIDTH / 2), 'y':newPipe3[1]['y']},
+    #list of middle planet
+    middlePlanets = [
+            {'x':SCREENWIDTH + 200, 'y': newplanet3[1]['y']},
+            {'x':SCREENWIDTH + 200 +  (SCREENWIDTH / 2), 'y':newplanet3[1]['y']},
     ]
 
-    pipeVelX = -4
+    planetVelX = -4
 
-    # player velocity, max velocity, downward accleration, accleration on flap
-    playerVelY    =  -9   # player's velocity along Y, default same as playerFlapped
+    # player velocity, max velocity, downward accleration, accleration on Boost
+    playerVelY    =  -9   # player's velocity along Y, default same as playerBoosted
     playerMaxVelY =  10   # max vel along Y, max descend speed
     playerMinVelY =  -8   # min vel along Y, max ascend speed
     playerAccY    =   1   # players downward accleration
     playerRot     =  40   # player's rotation
     playerVelRot  =   3   # angular speed
     playerRotThr  =  20   # rotation threshold
-    playerFlapAcc =  -9   # players speed on flapping
-    playerFlapped = False # True when player flaps
+    playerBoostAcc =  -9   # players speed on Boosting
+    playerBoostped = False # True when player Boosts
 
 
     while True:
@@ -270,22 +262,22 @@ def mainGame(movementInfo):
                 sys.exit()
             if event.type == KEYDOWN and (event.key == K_SPACE or event.key == K_UP):
                 if playery > -2 * IMAGES['player'][0].get_height():
-                    playerVelY = playerFlapAcc
-                    playerFlapped = True
+                    playerVelY = playerBoostAcc
+                    playerBoostped = True
                     SOUNDS['wing'].play()
 
         # check for crash here
         crashTest = checkCrash({'x': playerx, 'y': playery, 'index': playerIndex},
-                               upperPipes, middlePipes, lowerPipes)
+                               upperPlanets, middlePlanets, lowerPlanets)
         if crashTest[0]:
             return {
                 'y': playery,
                 'groundCrash': crashTest[1],
                 'basex': basex,
                 'basex2': basex2,
-                'upperPipes': upperPipes,
-                'lowerPipes': lowerPipes,
-                'middlePipes': middlePipes,
+                'upperPlanets': upperPlanets,
+                'lowerPlanets': lowerPlanets,
+                'middlePlanets': middlePlanets,
                 'score': score,
                 'playerVelY': playerVelY,
                 'playerRot': playerRot
@@ -293,9 +285,9 @@ def mainGame(movementInfo):
 
         # check for score
         playerMidPos = playerx + IMAGES['player'][0].get_width() / 2
-        for pipe in upperPipes:
-            pipeMidPos = pipe['x'] + IMAGES['pipe'][0].get_width() / 2
-            if pipeMidPos <= playerMidPos < pipeMidPos + 4:
+        for planet in upperPlanets:
+            planetMidPos = planet['x'] + IMAGES['planet'][0].get_width() / 2
+            if planetMidPos <= playerMidPos < planetMidPos + 4:
                 score += 1
                 SOUNDS['point'].play()
 
@@ -311,10 +303,10 @@ def mainGame(movementInfo):
             playerRot -= playerVelRot
 
         # player's movement
-        if playerVelY < playerMaxVelY and not playerFlapped:
+        if playerVelY < playerMaxVelY and not playerBoostped:
             playerVelY += playerAccY
-        if playerFlapped:
-            playerFlapped = False
+        if playerBoostped:
+            playerBoostped = False
 
             # more rotation to cover the threshold (calculated in visible rotation)
             playerRot = 45
@@ -322,36 +314,36 @@ def mainGame(movementInfo):
         playerHeight = IMAGES['player'][playerIndex].get_height()
         playery += min(playerVelY, BASEY - playery - playerHeight)
 
-        # move pipes to left
-        for uPipe, lPipe, mPipe in zip(upperPipes, lowerPipes, middlePipes):
-            uPipe['x'] += pipeVelX
-            lPipe['x'] += pipeVelX
-            mPipe['x'] += pipeVelX
+        # move Planets to left
+        for uplanet, lplanet, mplanet in zip(upperPlanets, lowerPlanets, middlePlanets):
+            uplanet['x'] += planetVelX
+            lplanet['x'] += planetVelX
+            mplanet['x'] += planetVelX
 
 
-        # add new pipe when first pipe is about to touch left of screen
-        if 0 < upperPipes[0]['x'] < 5:
-            newPipe = getRandomPipe()
-            upperPipes.append(newPipe[0])
-            lowerPipes.append(newPipe[1])
-            middlePipes.append(newPipe[2])
+        # add new planet when first planet is about to touch left of screen
+        if 0 < upperPlanets[0]['x'] < 5:
+            newplanet = getRandomplanet()
+            upperPlanets.append(newplanet[0])
+            lowerPlanets.append(newplanet[1])
+            middlePlanets.append(newplanet[2])
 
-        # remove first pipe if its out of the screen
-        if upperPipes[0]['x'] < -IMAGES['pipe'][0].get_width():
-            upperPipes.pop(0)
-            lowerPipes.pop(0)
-            middlePipes.pop(0)
+        # remove first planet if its out of the screen
+        if upperPlanets[0]['x'] < -IMAGES['planet'][0].get_width():
+            upperPlanets.pop(0)
+            lowerPlanets.pop(0)
+            middlePlanets.pop(0)
 
         # draw sprites
         SCREEN.blit(IMAGES['background'], (0,0))
 
-        for uPipe, lPipe, mPipe in zip(upperPipes, lowerPipes, middlePipes):
-            SCREEN.blit(IMAGES['pipe'][0], (uPipe['x'], uPipe['y']))
-            SCREEN.blit(IMAGES['pipe'][1], (lPipe['x'], lPipe['y']))
-            SCREEN.blit(IMAGES['pipe'][2], (mPipe['x'], mPipe['y']))
+        for uplanet, lplanet, mplanet in zip(upperPlanets, lowerPlanets, middlePlanets):
+            SCREEN.blit(IMAGES['planet'][0], (uplanet['x'], uplanet['y']))
+            SCREEN.blit(IMAGES['planet'][1], (lplanet['x'], lplanet['y']))
+            SCREEN.blit(IMAGES['planet'][2], (mplanet['x'], mplanet['y']))
 
         SCREEN.blit(IMAGES['base'], (basex, BASEY))
-        SCREEN.blit(IMAGES['baseup'], (basex2, BASEY2))
+        SCREEN.blit(IMAGES['head'], (basex2, HEAD))
         # print score so player overlaps the score
         showScore(score)
 
@@ -381,7 +373,7 @@ def showGameOverScreen(crashInfo):
     basex = crashInfo['basex']
     basex2 = crashInfo['basex2']
 
-    upperPipes, lowerPipes, middlePipes = crashInfo['upperPipes'], crashInfo['lowerPipes'], crashInfo['middlePipes']
+    upperPlanets, lowerPlanets, middlePlanets = crashInfo['upperPlanets'], crashInfo['lowerPlanets'], crashInfo['middlePlanets']
 
     # play hit and die sounds
     SOUNDS['hit'].play()
@@ -405,7 +397,7 @@ def showGameOverScreen(crashInfo):
         if playerVelY < 15:
             playerVelY += playerAccY
 
-        # rotate only when it's a pipe crash
+        # rotate only when it's a planet crash
         if not crashInfo['groundCrash']:
             if playerRot > -90:
                 playerRot -= playerVelRot
@@ -413,13 +405,13 @@ def showGameOverScreen(crashInfo):
         # draw sprites
         SCREEN.blit(IMAGES['background'], (0,0))
 
-        for uPipe, lPipe, mPipe in zip(upperPipes, lowerPipes, middlePipes):
-            SCREEN.blit(IMAGES['pipe'][0], (uPipe['x'], uPipe['y']))
-            SCREEN.blit(IMAGES['pipe'][1], (lPipe['x'], lPipe['y']))
-            SCREEN.blit(IMAGES['pipe'][2], (mPipe['x'], mPipe['y']))
+        for uplanet, lplanet, mplanet in zip(upperPlanets, lowerPlanets, middlePlanets):
+            SCREEN.blit(IMAGES['planet'][0], (uplanet['x'], uplanet['y']))
+            SCREEN.blit(IMAGES['planet'][1], (lplanet['x'], lplanet['y']))
+            SCREEN.blit(IMAGES['planet'][2], (mplanet['x'], mplanet['y']))
 
         SCREEN.blit(IMAGES['base'], (basex, BASEY))
-        SCREEN.blit(IMAGES['baseup'], (basex2, BASEY2))
+        SCREEN.blit(IMAGES['head'], (basex2, HEAD))
         showScore(score)
 
         
@@ -444,18 +436,18 @@ def playerShm(playerShm):
         playerShm['val'] -= 1
 
 
-def getRandomPipe():
-    """returns a randomly generated pipe"""
-    # y of gap between upper and lower pipe
-    gapY = random.randrange(0, int(BASEY * 0.9 - PIPEGAPSIZE))
+def getRandomplanet():
+    """returns a randomly generated planet"""
+    # y of gap between upper and lower planet
+    gapY = random.randrange(0, int(BASEY * 0.9 - PLANETGAPSIZE))
     gapY += int(BASEY * 0.2)
-    pipeHeight = IMAGES['pipe'][0].get_height()
-    pipeX = SCREENWIDTH + 10
+    planetHeight = IMAGES['planet'][0].get_height()
+    planetX = SCREENWIDTH + 10
 
     return [
-        {'x': pipeX, 'y': gapY - pipeHeight},  # upper pipe
-        {'x': pipeX, 'y': gapY + PIPEGAPSIZE}, # lower pipe
-        {'x': pipeX , 'y':gapY + PIPEGAPSIZE}, # middle pipe
+        {'x': planetX, 'y': gapY - planetHeight},  # upper planet
+        {'x': planetX, 'y': gapY + PLANETGAPSIZE}, # lower planet
+        {'x': planetX , 'y':gapY + PLANETGAPSIZE}, # middle planet
     ]
 
 
@@ -474,8 +466,8 @@ def showScore(score):
         Xoffset += IMAGES['numbers'][digit].get_width()
 
 
-def checkCrash(player, upperPipes, lowerPipes, middlePipes):
-    """returns True if player collders with base or pipes."""
+def checkCrash(player, upperPlanets, lowerPlanets, middlePlanets):
+    """returns True if player collders with base or Planets."""
     pi = player['index']
     player['w'] = IMAGES['player'][0].get_width()
     player['h'] = IMAGES['player'][0].get_height()
@@ -483,32 +475,32 @@ def checkCrash(player, upperPipes, lowerPipes, middlePipes):
     # if player crashes into ground
     if player['y'] + player['h'] >= BASEY - 1:
         return [True, True]
-    if player['y'] + player['h'] <= BASEY2 + 1:
+    if player['y'] + player['h'] <= HEAD:
         return [True, True]
     
     else:
 
         playerRect = pygame.Rect(player['x'], player['y'],
                       player['w'], player['h'])
-        pipeW = IMAGES['pipe'][0].get_width()
-        pipeH = IMAGES['pipe'][0].get_height()
+        planetW = IMAGES['planet'][0].get_width()
+        planetH = IMAGES['planet'][0].get_height()
 
-        for uPipe, lPipe, mPipe in zip(upperPipes, lowerPipes, middlePipes):
-            # upper and lower pipe rects
-            uPipeRect = pygame.Rect(uPipe['x'], uPipe['y'], pipeW, pipeH)
-            lPipeRect = pygame.Rect(lPipe['x'], lPipe['y'], pipeW, pipeH)
-            mPipeRect = pygame.Rect(mPipe['x'], mPipe['y'], pipeW, pipeH)
+        for uplanet, lplanet, mplanet in zip(upperPlanets, lowerPlanets, middlePlanets):
+            # upper and lower planet rects
+            uplanetRect = pygame.Rect(uplanet['x'], uplanet['y'], planetW, planetH)
+            lplanetRect = pygame.Rect(lplanet['x'], lplanet['y'], planetW, planetH)
+            mplanetRect = pygame.Rect(mplanet['x'], mplanet['y'], planetW, planetH)
 
-            # player and upper/lower pipe hitmasks
+            # player and upper/lower planet hitmasks
             pHitMask = HITMASKS['player'][pi]
-            uHitmask = HITMASKS['pipe'][0]
-            lHitmask = HITMASKS['pipe'][1]
-            mHitmask = HITMASKS['pipe'][2]
+            uHitmask = HITMASKS['planet'][0]
+            lHitmask = HITMASKS['planet'][1]
+            mHitmask = HITMASKS['planet'][2]
 
-            # if bird collided with upipe or lpipe
-            uCollide = pixelCollision(playerRect, uPipeRect, pHitMask, uHitmask)
-            lCollide = pixelCollision(playerRect, lPipeRect, pHitMask, lHitmask)
-            mCollide = pixelCollision(playerRect, mPipeRect, pHitMask, mHitmask)
+            # if bird collided with uplanet or lplanet
+            uCollide = pixelCollision(playerRect, uplanetRect, pHitMask, uHitmask)
+            lCollide = pixelCollision(playerRect, lplanetRect, pHitMask, lHitmask)
+            mCollide = pixelCollision(playerRect, mplanetRect, pHitMask, mHitmask)
 
             if uCollide or lCollide or mCollide:
                 return [True, False]
