@@ -40,10 +40,11 @@ BACKGROUNDS_LIST = (
 
 # list of Planets
 PLANETS_LIST = (
-    'assets/sprites/asteroid1.png',
     'assets/sprites/asteroid2.png',
-    )
+    'assets/sprites/asteroid2.png',
+    'assets/sprites/asteroid2.png'
 
+    )
 
 try:
     xrange
@@ -162,7 +163,7 @@ def showWelcomeAnimation():
     messagey = int(SCREENHEIGHT * 0.12)
 
     basex = 0
-    basex2 = 0
+    headx = 0
     # amount by which base can maximum shift to left
     baseShift = IMAGES['base'].get_width() - IMAGES['background'].get_width()
     baseShift2 = IMAGES['head'].get_width() - IMAGES['background'].get_width()
@@ -181,7 +182,7 @@ def showWelcomeAnimation():
                 return {
                     'playery': playery + playerShmVals['val'],
                     'basex': basex,
-                    'basex2':basex2,
+                    'headx':headx,
                     'playerIndexGen': playerIndexGen,
                 }
 
@@ -190,7 +191,7 @@ def showWelcomeAnimation():
             playerIndex = next(playerIndexGen)
         loopIter = (loopIter + 1) % 30
         basex = -((-basex + 4) % baseShift)
-        basex2 = -((-basex2 + 4) % baseShift2)
+        headx = -((-headx + 4) % baseShift2)
         playerShm(playerShmVals)
 
         # draw sprites
@@ -199,7 +200,7 @@ def showWelcomeAnimation():
                     (playerx, playery + playerShmVals['val']))
         SCREEN.blit(IMAGES['message'], (messagex, messagey))
         SCREEN.blit(IMAGES['base'], (basex, BASEY))
-        SCREEN.blit(IMAGES['head'], (basex2, HEAD))
+        SCREEN.blit(IMAGES['head'], (headx, HEAD))
 
 
         pygame.display.update()
@@ -213,7 +214,7 @@ def mainGame(movementInfo):
 
     basex = movementInfo['basex']
     baseShift = IMAGES['base'].get_width() - IMAGES['background'].get_width()
-    basex2 = movementInfo['basex2']
+    headx = movementInfo['headx']
     baseShift2 = IMAGES['head'].get_width() - IMAGES['background'].get_width()
 
     # get 2 new Planets to add to upperPlanets lowerPlanets list
@@ -241,7 +242,7 @@ def mainGame(movementInfo):
             {'x':SCREENWIDTH + 200 +  (SCREENWIDTH / 2), 'y':newplanet3[1]['y']},
     ]
 
-    planetVelX = -4
+    planetVelX = -10
 
     # player velocity, max velocity, downward accleration, accleration on Boost
     playerVelY    =  -9   # player's velocity along Y, default same as playerBoosted
@@ -274,7 +275,7 @@ def mainGame(movementInfo):
                 'y': playery,
                 'groundCrash': crashTest[1],
                 'basex': basex,
-                'basex2': basex2,
+                'headx': headx,
                 'upperPlanets': upperPlanets,
                 'lowerPlanets': lowerPlanets,
                 'middlePlanets': middlePlanets,
@@ -296,7 +297,7 @@ def mainGame(movementInfo):
             playerIndex = next(playerIndexGen)
         loopIter = (loopIter + 1) % 30
         basex = -((-basex + 100) % baseShift)
-        basex2 = -((-basex2 + 100) % baseShift2)
+        headx = -((-headx + 100) % baseShift2)
 
         # rotate the player
         if playerRot > -90:
@@ -322,7 +323,7 @@ def mainGame(movementInfo):
 
 
         # add new planet when first planet is about to touch left of screen
-        if 0 < upperPlanets[0]['x'] < 5:
+        if 0 < upperPlanets[0]['x'] < 9:
             newplanet = getRandomplanet()
             upperPlanets.append(newplanet[0])
             lowerPlanets.append(newplanet[1])
@@ -343,7 +344,7 @@ def mainGame(movementInfo):
             SCREEN.blit(IMAGES['planet'][2], (mplanet['x'], mplanet['y']))
 
         SCREEN.blit(IMAGES['base'], (basex, BASEY))
-        SCREEN.blit(IMAGES['head'], (basex2, HEAD))
+        SCREEN.blit(IMAGES['head'], (headx, HEAD))
         # print score so player overlaps the score
         showScore(score)
 
@@ -371,7 +372,7 @@ def showGameOverScreen(crashInfo):
     playerVelRot = 7
 
     basex = crashInfo['basex']
-    basex2 = crashInfo['basex2']
+    headx = crashInfo['headx']
 
     upperPlanets, lowerPlanets, middlePlanets = crashInfo['upperPlanets'], crashInfo['lowerPlanets'], crashInfo['middlePlanets']
 
@@ -411,7 +412,7 @@ def showGameOverScreen(crashInfo):
             SCREEN.blit(IMAGES['planet'][2], (mplanet['x'], mplanet['y']))
 
         SCREEN.blit(IMAGES['base'], (basex, BASEY))
-        SCREEN.blit(IMAGES['head'], (basex2, HEAD))
+        SCREEN.blit(IMAGES['head'], (headx, HEAD))
         showScore(score)
 
         
@@ -475,7 +476,7 @@ def checkCrash(player, upperPlanets, lowerPlanets, middlePlanets):
     # if player crashes into ground
     if player['y'] + player['h'] >= BASEY - 1:
         return [True, True]
-    if player['y'] + player['h'] <= HEAD:
+    if player['y'] + player['h'] <= HEAD + 1:
         return [True, True]
     
     else:
